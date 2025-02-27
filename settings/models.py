@@ -16,6 +16,14 @@ class BannedCompanyName(models.Model):
     def __str__(self):
         return self.name
 
+class CategoryNumenclature(models.Model):
+    class Meta:
+        verbose_name = _('Товарная позиция')
+        verbose_name_plural = _("Товарные позиции")
+    numenclature = models.CharField(max_length=600, unique=True, null=False, blank=False, verbose_name=_('ТМЦ'))
+    amount = models.IntegerField(verbose_name="Количество")
+    def __str__(self):
+        return self.numenclature
 
 class PublicEmailDomain(models.Model):
     class Meta:

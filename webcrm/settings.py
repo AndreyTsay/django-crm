@@ -26,18 +26,20 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Database
 DATABASES = {
     'default': {
-        # for MySQl
-        'ENGINE': 'django.db.backends.mysql',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        # # for MySQl
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'PORT': '3306',
 
-        # for PostgreSQL
-        # "ENGINE": "django.db.backends.postgresql",
-        # 'PORT': '5432',   # for PostgreSQL
+        # # for PostgreSQL
+        # # "ENGINE": "django.db.backends.postgresql",
+        # # 'PORT': '5432',   # for PostgreSQL
 
-        'NAME': 'crm_db',
-        'USER': 'crm_user',
-        'PASSWORD': 'crmpass',
-        'HOST': 'localhost',
+        # 'NAME': 'crm_db',
+        # 'USER': 'crm_user',
+        # 'PASSWORD': 'crmpass',
+        # 'HOST': 'localhost',
     }
 }
 
@@ -58,30 +60,30 @@ DEBUG = True
 FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # Internationalization
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'ru'
 LANGUAGES = [
-    ('ar', 'Arabic'),
-    ('cs', 'Czech'),
-    ('de', 'German'),
-    ('el', 'Greek'),
+    # ('ar', 'Arabic'),
+    # ('cs', 'Czech'),
+    # ('de', 'German'),
+    # ('el', 'Greek'),
     ('en', 'English'),
-    ('es', 'Spanish'),
-    ('fr', 'French'),
+    # ('es', 'Spanish'),
+    # ('fr', 'French'),
     # ('he', 'Hebrew'),
-    ('hi', 'Hindi'),
-    ('id', 'Indonesian'),
-    ('it', 'Italian'),
-    ('ja', 'Japanese'),
-    ('ko', 'Korean'),
-    ('nl', 'Dutch'),
-    ('pl', 'Polish'),
-    ('pt-br', 'Portuguese'),
+    # ('hi', 'Hindi'),
+    # ('id', 'Indonesian'),
+    # ('it', 'Italian'),
+    # ('ja', 'Japanese'),
+    # ('ko', 'Korean'),
+    # ('nl', 'Dutch'),
+    # ('pl', 'Polish'),
+    # ('pt-br', 'Portuguese'),
     # ('ro', 'Romanian'),
     ('ru', 'Russian'),
-    ('tr', 'Turkish'),
-    ('uk', 'Ukrainian'),
-    ('vi', 'Vietnamese'),
-    ('zh-hans', 'Chinese'),
+    # ('tr', 'Turkish'),
+    # ('uk', 'Ukrainian'),
+    # ('vi', 'Vietnamese'),
+    # ('zh-hans', 'Chinese'),
 ]
 
 TIME_ZONE = 'UTC'   # specify your time zone
@@ -113,7 +115,10 @@ INSTALLED_APPS = [
     'chat.apps.ChatConfig',
     'voip',
     'common.apps.CommonConfig',
-    'settings'
+    'settings',
+    'docx',
+    'storages',
+    'pycades',
 ]
 
 MIDDLEWARE = [
@@ -279,20 +284,20 @@ MARK_PAYMENTS_THROUGH_REP = False
 
 
 # Site headers
-SITE_TITLE = 'CRM'
-ADMIN_HEADER = "ADMIN"
+SITE_TITLE = 'Заявки судебных участков'
+ADMIN_HEADER = "Заявки судебных участков"
 ADMIN_TITLE = "CRM Admin"
 INDEX_TITLE = _('Main Menu')
 
 
 # This is copyright information. Please don't change it!
-COPYRIGHT_STRING = "Django-CRM. Copyright (c) 2024"
-PROJECT_NAME = "Django-CRM"
-PROJECT_SITE = "https://github.com/DjangoCRM/django-crm/"
+COPYRIGHT_STRING = "Комитет по вопросам законности, правопорядка и безопасности(c) 2024"
+PROJECT_NAME = "Заявки судебных участков"
+PROJECT_SITE = "https://zakon.gov.spb.ru/"
 
 
 TESTING = sys.argv[1:2] == ['test']
 if TESTING:
     SECURE_SSL_REDIRECT = False
-    LANGUAGE_CODE = 'en'
-    LANGUAGES = [('en', ''), ('uk', '')]
+    LANGUAGE_CODE = 'ru'
+    LANGUAGES = [('ru', ''), ('en', '')]

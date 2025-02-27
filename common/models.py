@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
 
 from common.utils.helpers import get_formatted_short_date
+from settings.models import CategoryNumenclature
 
 
 class Base(models.Model):
@@ -330,3 +331,19 @@ class UserProfile(models.Model):
         if not self.language_code:
             self.language_code = settings.LANGUAGE_CODE
         super().save(*args, **kwargs)
+
+# 
+
+class Numenclature(models.Model):
+    # ask = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="Заявка")
+    inventory = models.ForeignKey(CategoryNumenclature, on_delete=models.CASCADE, verbose_name="ТМЦ", related_name='numenclature_inventory')
+    amount = models.IntegerField(verbose_name="Количество")
+
+    def __str__(self):
+        return f"{self.inventory} - {self.ask}"
+
+    class Meta:
+        verbose_name_plural = "ТМЦ для заявки"
+        verbose_name = "ТМЦ для заявки"
+        
+        ordering = ['inventory']

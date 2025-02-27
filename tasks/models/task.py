@@ -8,6 +8,8 @@ from django.utils.translation import gettext_lazy as _
 from common.utils.helpers import get_today
 from common.utils.helpers import USER_MODEL
 from tasks.models.taskbase import TaskBase
+from common.models import Numenclature
+from settings.models import CategoryNumenclature
 
 
 class Task(TaskBase):
@@ -34,6 +36,9 @@ class Task(TaskBase):
     stage = models.ForeignKey(
         "TaskStage", on_delete=models.PROTECT, verbose_name=_("Stage")
     )
+    sla = models.ManyToManyField(CategoryNumenclature,     
+        blank=True, null=True,
+        verbose_name=_("ТМЦ"),)
     hide_main_task = models.BooleanField(
         default=False,
         verbose_name=_("Hide main task"),

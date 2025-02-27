@@ -40,6 +40,18 @@ from tasks.utils.admfilters import ByResponsibleFilter
 from tasks.utils.admfilters import IsActiveTaskFilter
 from tasks.utils.admfilters import ByOwnerFilter
 from tasks.utils.admfilters import TaskTagFilter
+from settings.models import CategoryNumenclature
+
+from django.core.files.base import File
+from docx import Document
+import os
+from django.conf import settings
+from datetime import datetime
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+from django.core.files.storage import default_storage
+from django.utils.text import get_valid_filename
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 co_owner_subject = _("You have been assigned as the task co-owner")
 due_date_str = _("Due date")
@@ -96,6 +108,11 @@ class TasksBaseModelAdmin(BaseModelAdmin):
         if db_field.name == "subscribers":
             kwargs["queryset"] = get_active_users().order_by("username")
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+    
+    # def formfield_for_category_numenclatures(self, db_field, request, **kwargs):
+    #     if db_field.name == "category_numenclatures":
+    #         kwargs["queryset"] = CategoryNumenclature.objects.all().order_by("numenclature")
+    #     return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_changeform_initial_data(self, request):
         parent_obj = None
@@ -117,6 +134,7 @@ class TasksBaseModelAdmin(BaseModelAdmin):
             parent_obj = Project.objects.get(id=parent_project_id)
         if parent_obj:
             initial["name"] = parent_obj.name
+            initial["sla"] = parent_obj.sla
             initial["description"] = f"{parent_obj.description}\n({parent_obj.owner})"
             initial["note"] = parent_obj.note
         return initial
@@ -148,7 +166,7 @@ class TasksBaseModelAdmin(BaseModelAdmin):
                 if len(responsible) == 1 or request.user in (obj.owner, obj.co_owner):
                     fields.extend(["next_step", ("next_step_date", "remind_me")])
                 fields.extend([
-                    "workflow_area",
+                    "workflow_area", 'sla',
                     ("creation_date", "closing_date"),
                     ("owner", "co_owner"),
                 ])
@@ -178,7 +196,7 @@ class TasksBaseModelAdmin(BaseModelAdmin):
                         "name",
                         ("due_date", "priority"),
                         "description",
-                        "note",
+                        "note", 'sla',
                         'stage',
                         "workflow_area",
                         ("creation_date", "closing_date"),
@@ -198,7 +216,7 @@ class TasksBaseModelAdmin(BaseModelAdmin):
                 "name",
                 ("due_date", "priority"),
                 "description",
-                "note",
+                "note", 'sla',
                 "responsible",
                 ("owner", "co_owner"),
                 'token'
@@ -282,7 +300,7 @@ class TasksBaseModelAdmin(BaseModelAdmin):
             "creation_date",
             "workflow",
             "modified_by",
-            "act",
+            "act", 
             "responsible_list",
             "subscribers_list",
             "coloured_name",
@@ -405,7 +423,48 @@ class TasksBaseModelAdmin(BaseModelAdmin):
                 save_message(request.user, html_msg, "INFO")
 
         super().save_model(request, obj, form, change)
-        
+        if not change:
+            # Создаем пустой шаблон .dotx
+            doc = Document()
+            title_paragraph = doc.add_paragraph(obj.name)
+            title_paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            subtitle = doc.add_paragraph(f"Создано: {obj.creation_date}")
+            subtitle.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            
+            # Добавляем основную информацию
+            doc.add_paragraph(f"Ответственный: {obj.responsible.first()}")
+            doc.add_paragraph(f"Описание: {obj.description}")
+            doc.add_paragraph(f"Описание: {obj.sla}")
+            
+            # Генерация уникального имени файла на основе pk объекта
+            template_filename = get_valid_filename(f'template_{obj.pk}.dotx')
+            
+            # Создаем директорию с датой
+            date_dir = datetime.now().strftime('%Y/%m/%d/%H%M%S/')
+            
+            # Формируем путь относительно MEDIA_ROOT
+            safe_template_path = os.path.join('docs', date_dir)
+            
+            # Создаем все необходимые директории
+            full_path = os.path.join(settings.MEDIA_ROOT, safe_template_path)
+            os.makedirs(full_path, exist_ok=True)
+            
+            # Сохранение шаблона через storage
+            with default_storage.open(os.path.join(safe_template_path, template_filename), 'wb') as destination:
+                doc.save(destination)
+            
+            # Сохранение пути к шаблону в модели
+            obj.document_template = os.path.join(safe_template_path, template_filename)
+            obj.save()
+            
+            # Добавляем файл в attach_files
+            with default_storage.open(os.path.join(safe_template_path, template_filename), 'rb') as f:
+                file_content = File(f)
+                TheFile.objects.create(
+                    file=file_content,
+                    content_object=obj
+                )
+                            
         if not change and getattr(obj, 'task', None):
             obj.subscribers.remove(obj.responsible.first())        
 

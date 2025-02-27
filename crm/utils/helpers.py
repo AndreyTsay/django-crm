@@ -24,6 +24,7 @@ from common.utils.helpers import USER_MODEL
 from crm.utils.crm_imap import CrmIMAP
 from massmail.models import EmailAccount
 from settings.models import BannedCompanyName
+from settings.models import CategoryNumenclature
 from settings.models import PublicEmailDomain
 from settings.models import StopPhrase
 
